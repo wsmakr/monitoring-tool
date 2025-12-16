@@ -5,14 +5,17 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
+// Reusable function
 function getSuccessfulChecks() {
     return checks.filter(c => c.success).length;
 }
+
 // Environment variables of Node.js for modularity of monitoring-tool
 const CONFIG = {
     url: process.env.URL || 'http://www.google.com/',
     checkInterval: parseInt(process.env.CHECK_INTERVAL) || 10000,
+    timeoutUptime: parseInt(process.env.TIMEOUT_UPTIME) || 30000,
+    port: parseInt(process.env.PORT || 3000)
 };
 
 let checks = loadData();
@@ -30,7 +33,7 @@ async function checkWebsite() {
             duration,
             success: true
         });
-        console.log(`\`✅ ${new Date().toLocaleTimeString()} - Status: ${response.status} ${response.statusText} - Dutration: ${duration}ms`);
+        console.log(`\`✅ ${new Date().toLocaleTimeString()} - Status: ${response.status} ${response.statusText} - Duration: ${duration}ms`);
         saveData()
     } catch (error) {
         const duration = Date.now() - startTime;
@@ -69,15 +72,16 @@ function loadData() {
 
 // Output for Console
 console.log(`🚀 Starting monitoring for: ${CONFIG.url}`);
-console.log(`📊 Check interval: ${CONFIG.checkInterval}ms\n`);
+console.log(`📊 Check interval: ${CONFIG.checkInterval}ms`);
+console.log(`📊 Timeout uptime: ${CONFIG.timeoutUptime}ms\n`);
 
 checkWebsite();
-setInterval(getUptime, CONFIG.checkInterval);
+setInterval(checkWebsite, CONFIG.checkInterval);
 
 setInterval(() => {
     console.log(`\n📈 Current Uptime: ${getUptime()}% (${getSuccessfulChecks()}/${checks.length} 
     checks passed)\n`);
-}, 30000);
+}, CONFIG.timeoutUptime);
 
 
 //Express API
@@ -94,6 +98,8 @@ app.get('/health', (req, res) => {
 app.get('/data', (req, res) => {
     res.json(checks)
 });
+
+app.
 
 app.listen(PORT, () => {
     console.log(`\n📡 API running on http://localhost:${PORT}`);
