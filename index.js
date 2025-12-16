@@ -1,7 +1,14 @@
 const axios = require('axios');
 const fs = require('fs');
 const DATA_FILE = 'monitoring-data.json';
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
 
+
+function getSuccessfulChecks() {
+    return checks.filter(c => c.success).length;
+}
 // Environment variables of Node.js for modularity of monitoring-tool
 const CONFIG = {
     url: process.env.URL || 'http://www.google.com/',
@@ -42,7 +49,7 @@ async function checkWebsite() {
 // Get uptime of given website
 function getUptime() {
     if (checks.length === 0) return 0;
-    const successful = checks.filter(statusReport => statusReport.success).length;
+    const successful = getSuccessfulChecks();
     return ((successful / checks.length) * 100).toFixed(2);
 }
 
@@ -68,6 +75,28 @@ checkWebsite();
 setInterval(getUptime, CONFIG.checkInterval);
 
 setInterval(() => {
-    console.log(`\n📈 Current Uptime: ${getUptime()}% (${checks.filter(statusReport => statusReport.success).length}/${checks.length} 
+    console.log(`\n📈 Current Uptime: ${getUptime()}% (${getSuccessfulChecks()}/${checks.length} 
     checks passed)\n`);
 }, 30000);
+
+
+//Express API
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'running',
+        monitoringUrl: CONFIG.url,
+        uptime: getUptime(),
+        totalChecks: checks.length,
+        successfulChecks: getSuccessfulChecks()
+    });
+});
+
+app.get('/data', (req, res) => {
+    res.json(checks)
+});
+
+app.listen(PORT, () => {
+    console.log(`\n📡 API running on http://localhost:${PORT}`);
+    console.log(`   Health: http://localhost:${PORT}/health`);
+    console.log(`   Data: http://localhost:${PORT}/data\n`);
+});
