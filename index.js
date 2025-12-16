@@ -99,8 +99,6 @@ app.get('/data', (req, res) => {
     res.json(checks)
 });
 
-app.
-
 app.listen(PORT, () => {
     console.log(`\n📡 API running on http://localhost:${PORT}`);
     console.log(`   Health: http://localhost:${PORT}/health`);

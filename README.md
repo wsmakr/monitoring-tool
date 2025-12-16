@@ -28,11 +28,13 @@ Create a `.env` file or pass environment variables:
 ```
 URL=https://example.com
 CHECK_INTERVAL=10000
+TIMEOUT_UPTIME=30000
 PORT=3000
 ```
 
 - `URL` - Website to monitor (default: https://www.google.com)
 - `CHECK_INTERVAL` - Check frequency in milliseconds (default: 10000)
+- `TIMEOUT_UPTIME` - Timeout uptime frequency in milliseconds (default: 30000)
 - `PORT` - API port (default: 3000)
 
 ## Running
